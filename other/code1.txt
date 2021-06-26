@@ -1,0 +1,371 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import scipy as sp
+
+'''
+ 2.1 question 1
+'''
+def character_frequencies(s):
+    char_num_d = dict()
+    
+    for ch in s:
+        ch1 = ch
+        if (ch1 >= 'A' and ch1 <= 'Z'):
+            ch1 = chr(ord(ch1) + 32)
+        char_num_d[ch1] = char_num_d.get(ch1, 0) + 1
+    
+    item_list = list(char_num_d.items())
+    item_list.sort(key = lambda x : (x[1], x[0]), reverse = True)
+    
+    alist = list()
+    blist = list()
+    for item in item_list:
+        alist.append(item[0])
+        blist.append(item[1])
+    
+    alist = tuple(alist)
+    blist = tuple(blist)
+    
+    return (alist, blist)
+
+
+# print(character_frequencies('Wooloomooloo'))
+
+# s1 = '1: The quick brown fox jumps over the lazy dog. '
+# s2 = '2: Pack my box with five dozen liquor jugs. '
+# s3 = '3: Portez ce vieux whisky au juge blond qui fume. '
+# T=character_frequencies(s1+s2+s3)
+# for i,c in enumerate(T[0]):
+#     print((c,T[1][i]))
+
+'''
+ 2.2 question 2
+'''
+def entropy(s0,s1,alphabet='abcdefghijklmnopqrstuvwxyz'):
+    s0_item = character_frequencies(s0)
+    s1_item = character_frequencies(s1)
+    
+    s0_d = dict()
+    s1_d = dict()
+    
+    for i in range(len(s0_item[0])):
+        key = s0_item[0][i]
+        value = s0_item[1][i]
+        s0_d[key] = value
+    
+    for i in range(len(s1_item[0])):
+        key = s1_item[0][i]
+        value = s1_item[1][i]
+        s1_d[key] = value
+        
+    sum0 = 0
+    sum1 = 0
+    for ch in alphabet:
+        sum0 += s0_d.get(ch, 0)
+        sum1 += s1_d.get(ch, 0)
+    
+    relative_entropy = 0
+    for ch in alphabet:
+        f = s0_d.get(ch, 0) / sum0
+        g = s1_d.get(ch, 0) / sum1
+        if (f == 0):
+            continue
+        relative_entropy += f * np.log(f / g)
+    
+    return relative_entropy
+
+# s0 = 'The quick brown fox jumps over the lazy dog.'
+# s1 = 'Pack my box with five dozen liquor jugs.'
+# s2 = 'Portez ce vieux whisky au juge blond qui fume.'
+# print(entropy(s0,s2))
+# print(entropy(s1,s2))
+
+'''
+ 2.3 question 3
+'''
+def price(widget,r,y,b):
+    total_price = 0
+    
+    if (type(widget) != tuple):
+        if (widget == 'RED'):
+            return r
+        elif (widget == 'YELLOW'):
+            return y
+        else:
+            return b
+    
+    for item in widget:
+        total_price += price(item, r, y, b)
+        
+    return total_price
+    
+
+red = ('RED',)
+yellow = ('YELLOW',)
+blue = ('BLUE',)
+
+purple = (red,blue)
+green = (yellow,blue)
+orange = (red,yellow)
+white = (3*red,3*orange,3*yellow,3*green,4*blue,2*purple)
+pink = (white,red)
+black = (pink,purple)
+grey = (black,white)
+joker = (purple,green)
+sulfur = (white,yellow)
+galah = (pink,grey)
+
+# print(price(sulfur,1,2,3))
+# print(price(galah,1,2,3))
+
+'''
+ 2.4 question 4
+'''
+def constituents(widget):
+    total_num = (0,0,0)
+    
+    if (type(widget) != tuple):
+        if (widget == 'RED'):
+            return (1, 0, 0)
+        elif (widget == 'YELLOW'):
+            return (0,1,0)
+        else:
+            return (0,0,1)
+    
+    for item in widget:
+        temp = constituents(item)
+        total_num = (total_num[0] + temp[0],total_num[1] + temp[1],total_num[2] + temp[2])
+        
+    return total_num
+    
+    
+# print(constituents(purple))
+# print(constituents(joker))
+# print(constituents(galah))
+
+'''
+ 2.5 question 5
+'''
+def Laguerre(N,x):
+    x_num = x.shape[0]
+    L_array = np.zeros((N + 1, x_num))
+    Q_array = np.zeros((N + 1, x_num))
+    
+    for i in range(x_num):
+        L_array[0][i] = 1
+        L_array[1][i] = (2*0+1-x[i]) * L_array[0][i] / (0+1) - 0 / (0+1) * 0
+        
+        for n in range(1, N):
+            L_array[n+1][i] = (2*n+1-x[i]) * L_array[n][i] / (n+1) - n / (n+1) * L_array[n-1][i]
+    
+    for i in range(x_num):
+        Q_array[0][i] = 0
+        Q_array[1][i] = 1
+        
+        for n in range(1, N):
+            Q_array[n+1][i] = L_array[n][i] + Q_array[n][i]
+        
+    return (L_array, Q_array)
+    
+    
+# L,Q = Laguerre(5,np.array([1,5]))
+# print(L,'\n\n',Q)
+
+'''
+ 2.6 question 6
+'''
+def roots(N):
+    A = np.zeros((N, N))
+    A[0][0] = 1
+    A[0][1] = -1
+    
+    for n in range(1, N):
+        A[n][n-1] = -1 * n
+        A[n][n] = 2 * n + 1
+        if (n + 1 < N):
+            A[n][n + 1] = -1 * (n + 1)
+    #print(A)
+    a, b = np.linalg.eig(A)
+    
+    return a
+
+# n = 10
+# print(roots(n)[-1] < 4*n+2)
+    
+
+'''
+ 2.7 question 7
+'''
+def orthogonal_functions(N):
+    x = roots(N)
+    L, Q = Laguerre(N, x)
+    
+    ei = list()
+    for i in range(len(x)):
+        temp = 1 / (np.sqrt(x[i]) * np.abs(Q[N][i]))
+        ei.append(temp)
+    ei = np.array(ei)
+    
+    L1 = np.delete(L, N, axis = 0)
+    F = L1 * ei
+    
+    return x, F
+    
+x,f = orthogonal_functions(300)
+print(np.max(np.abs(f@f.T-np.eye(len(x)))))
+
+
+'''
+ 2.8 question 8
+'''
+def replacements(n):
+    #1->red, 2->green
+    box_list = [1] + [2]*n
+    counter = 0
+    
+    while (True):
+        random_index = np.random.randint(0, len(box_list))
+        if (box_list[random_index] == 1):
+            break
+        box_list = [1,1] + box_list
+        box_list.pop(-1)
+        counter += 1
+        #print(box_list)
+        if (counter == n):
+            break
+    return counter
+
+
+#print(replacements(50))
+
+
+'''
+ 2.9 question 9
+''' 
+def replacements_distribution(n,T):
+    P_list = [0] * (n + 1)
+    
+    for i in range(T):
+        k = replacements(n)
+        P_list[k] += 1
+    
+    for i in range(len(P_list)):
+        P_list[i] = P_list[i] / T
+        
+    return P_list
+    
+    
+# n = 4
+# k = np.arange(n+1)
+# for _ in range(9):
+#     P = replacements_distribution(n,10**4)
+#     print(f'{np.sum(k*(k+1)*P):.4f} {P[0]:.4f} {P[-1]:.4f}')
+    
+'''
+ 2.10 question 10
+''' 
+def K_integral(n):
+    f = lambda x : 1/np.sqrt(3-np.cos(x))
+    a = -1 * np.pi
+    b = np.pi
+    
+    x = np.linspace(a, b, n+1)
+    y = f(x)
+    y_right = y[1:]
+    y_left = y[:-1]
+    dx = (b - a) / n
+    T = (dx/2) * np.sum(y_right + y_left)
+    
+    return T
+    
+# for n in range(2,12):
+#     print('{:>2}: {:>.2e}'.format(n,abs(K_integral(n)-K_integral(50))))
+    
+    
+'''
+ 2.11 question 11
+''' 
+
+    
+
+    
+'''
+ 2.12 question 12
+''' 
+def T(n,x):
+    x_len = x.shape[0]
+    T0 = np.array([1]*x_len)
+    T1 = x
+    
+    if (n == 0):
+        return T0
+    if (n == 1):
+        return T1
+    
+    for i in range(2, n+1):
+        Tn = 2 * x * T1 - T0
+        T0 = T1
+        T1 = Tn
+    
+    return Tn
+    
+# x = np.linspace(-1,1,200)
+# n=10
+
+# plt.plot(x,T(n,x),linewidth=3)
+# plt.xlabel('x',fontsize=16)
+# plt.ylabel(f'T({n},x)',fontsize=16);
+# plt.tick_params(axis='both',labelsize=16);
+
+'''
+ 2.13 question 13
+''' 
+def Chebyshev_fit(degree,x,y):
+    deg = len(x) - 1
+    A = np.polynomial.chebyshev.chebvander(x, deg)
+    c_array = c = np.linalg.solve(A, y) 
+    
+    T_array = []
+    for i in range(degree + 1):
+        t = T(i, x)
+        T_array.append(t)
+    T_array = np.array(T_array)
+    #print(c_array.shape)
+    c_array_T = np.reshape(c_array, (1, degree+1))
+    #print(c_array_T.shape)
+    z_array = np.dot(c_array_T, T_array)
+    
+    return (c_array, z_array)
+
+
+# x = np.linspace(-1,1,6)
+# y = T(3,x)
+
+# c, z = Chebyshev_fit(5,x,y)
+# c[np.where(np.abs(c) < 1e-15)] = 0
+# print(c)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

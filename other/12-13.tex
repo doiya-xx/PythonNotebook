@@ -1,0 +1,47 @@
+12
+def T(n,x):
+    
+    ### PUT YOUR CODE BELOW THIS LINE ##
+
+    tem = np.arccos(x)
+    ans = np.cos(n * tem)
+    
+    return ans
+    
+    
+
+
+13
+def Chebyshev_fit(degree,x,y):
+    """Computes the least-squares Chebyshev polynomial model 
+    
+        z = c[0]*T(0,x) + c[1]*T(1,x) + ... + c[degree]*T(degree,x)
+        
+        The function returns c, z. 
+    
+    Parameters
+    ----------
+    degree: polynomial degree for fitting function.
+    x: length-n numpy array of grid values
+    y: length-n numpy array of function values.
+    
+    
+    """
+    # These might help. 
+    # You can comment them out if you prefer not to use them.
+    
+    k = np.arange(degree+1)
+    
+    M = T(k[None,:],x[:,None]) # Broadcasting
+    
+    L = np.average(M[:,:,None]*M[:,None,:],axis=0)
+
+    ### PUT YOUR CODE BELOW THIS LINE ###
+    A = np.polynomial.chebyshev.chebvander(x,degree)
+    c = np.linalg.lstsq(A,y,rcond=None)[0]
+    z = np.zeros(len(x))
+    for ki in k:
+        for zi in range(len(x)):
+            z[zi] = np.sum(c[ki]*M[zi])
+
+    return c,z

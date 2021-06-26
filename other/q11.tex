@@ -1,0 +1,14 @@
+    A=np.zeros([n,n])
+    A[1:,:-1]=np.eye(n-1)
+    A=A+A.T -2*np.eye(n)
+    A=A*n**2
+    A[0,1]=0
+    A[-1,-2]=0
+    #print(A)
+    guess=guess.reshape(n,1)
+    for i in range(iterations):
+        #guess[0,0]=0
+        #guess[-1,0]=0
+        guess=guess-np.linalg.inv(A+p*guess**(p-1))@(A@guess+guess**p)
+
+    return guess
